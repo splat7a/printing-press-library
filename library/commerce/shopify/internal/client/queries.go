@@ -158,6 +158,7 @@ const OrdersGetQuery = `query($id: String!) {
     customer{ id email displayName }
     shippingAddress{ city province country countryCodeV2 zip }
     lineItems(first:50){ edges{ node{
+      id
       title quantity sku vendor
       originalUnitPriceSet{ shopMoney{ amount } }
       discountedUnitPriceSet{ shopMoney{ amount } }
@@ -204,6 +205,7 @@ const OrdersListQuery = `query($first: Int!, $after: String, $query: String, $so
       customer{ id email displayName }
       shippingAddress{ city province country countryCodeV2 zip }
       lineItems(first:50){ edges{ node{
+        id
         title quantity sku vendor
         originalUnitPriceSet{ shopMoney{ amount } }
         discountedUnitPriceSet{ shopMoney{ amount } }

@@ -45,6 +45,7 @@ func TestSabeenManekiaImportParityQueriesIncludeOperationalFields(t *testing.T) 
 		"presentmentCurrencyCode",
 		"currentTotalPriceSet{ shopMoney{ amount currencyCode } presentmentMoney{ amount currencyCode } }",
 		"lineItems(first:50)",
+		"lineItems(first:50){ edges{ node{\n        id",
 		"discountApplications(first:10)",
 		"fulfillments(first:5)",
 		"transactions(first:5)",
