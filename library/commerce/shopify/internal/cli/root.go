@@ -13,9 +13,9 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/client"
 	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/config"
+	"github.com/spf13/cobra"
 )
 
 var version = "1.0.0"
@@ -192,6 +192,13 @@ Run 'shopify-pp-cli doctor' to verify auth and connectivity.`,
 	rootCmd.AddCommand(newInventoryItemsCmd(flags))
 	rootCmd.AddCommand(newOrdersCmd(flags))
 	rootCmd.AddCommand(newProductsCmd(flags))
+	// PATCH: register SabeenManekia full-import Shopify resource groups.
+	rootCmd.AddCommand(newShopCmd(flags))
+	rootCmd.AddCommand(newLocationsCmd(flags))
+	rootCmd.AddCommand(newCollectionsCmd(flags))
+	rootCmd.AddCommand(newAbandonedCheckoutsCmd(flags))
+	rootCmd.AddCommand(newDiscountsCmd(flags))
+	rootCmd.AddCommand(newDraftOrdersCmd(flags))
 	rootCmd.AddCommand(newDoctorCmd(flags))
 	rootCmd.AddCommand(newAuthCmd(flags))
 	rootCmd.AddCommand(newAgentContextCmd(rootCmd))

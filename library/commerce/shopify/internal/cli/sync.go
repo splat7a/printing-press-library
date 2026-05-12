@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/client"
 	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/store"
+	"github.com/spf13/cobra"
 )
 
 // syncResult holds the outcome of syncing a single resource.
@@ -216,9 +216,10 @@ Exit codes & warnings:
 
 // graphqlSyncDef describes how to sync a resource via GraphQL.
 type graphqlSyncDef struct {
-	Query     string // GraphQL query constant
-	FieldPath string // top-level field in the response data (e.g., "issues")
-	PageSize  int    // default page size for this resource
+	Query            string         // GraphQL query constant
+	FieldPath        string         // top-level field in the response data (e.g., "issues")
+	PageSize         int            // default page size for this resource
+	DefaultVariables map[string]any // PATCH: resource-specific GraphQL variables for import-parity syncs.
 }
 
 // graphqlSyncDefs returns the sync definitions for all syncable resources.
@@ -239,14 +240,40 @@ func graphqlSyncDefs() map[string]graphqlSyncDef {
 			FieldPath: "inventoryItems",
 			PageSize:  50,
 		},
-		"orders": {
-			Query:     client.OrdersListQuery,
-			FieldPath: "orders",
+		"locations": {
+			Query:     client.LocationsListQuery,
+			FieldPath: "locations",
 			PageSize:  50,
+		},
+		"orders": {
+			Query:            client.OrdersListQuery,
+			FieldPath:        "orders",
+			PageSize:         50,
+			DefaultVariables: map[string]any{"query": "status:any", "sortKey": "CREATED_AT", "reverse": true},
 		},
 		"products": {
 			Query:     client.ProductsListQuery,
 			FieldPath: "products",
+			PageSize:  50,
+		},
+		"collections": {
+			Query:     client.CollectionsListQuery,
+			FieldPath: "collections",
+			PageSize:  50,
+		},
+		"abandoned-checkouts": {
+			Query:     client.AbandonedCheckoutsListQuery,
+			FieldPath: "abandonedCheckouts",
+			PageSize:  50,
+		},
+		"discounts": {
+			Query:     client.DiscountsListQuery,
+			FieldPath: "codeDiscountNodes",
+			PageSize:  50,
+		},
+		"draft-orders": {
+			Query:     client.DraftOrdersListQuery,
+			FieldPath: "draftOrders",
 			PageSize:  50,
 		},
 	}
@@ -287,6 +314,10 @@ func syncResource(c *client.Client, db *store.Store, resource, sinceTS string, f
 	for {
 		variables := map[string]any{
 			"first": pageSize,
+		}
+		// PATCH: merge per-resource default variables such as orders(query:"status:any") for full import parity.
+		for key, value := range def.DefaultVariables {
+			variables[key] = value
 		}
 		if cursor != "" {
 			variables["after"] = cursor
@@ -429,12 +460,19 @@ func syncResource(c *client.Client, db *store.Store, resource, sinceTS string, f
 }
 
 func defaultSyncResources() []string {
+	// PATCH: default sync now covers all SabeenManekia import-parity resources;
+	// optional-scope denials are downgraded to per-resource warnings by syncResource.
 	return []string{
 		"customers",
 		"fulfillment-orders",
 		"inventory-items",
+		"locations",
 		"orders",
 		"products",
+		"collections",
+		"abandoned-checkouts",
+		"discounts",
+		"draft-orders",
 	}
 }
 

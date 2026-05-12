@@ -40,7 +40,14 @@ var whichIndex = []whichEntry{
 	{Command: "orders search", Description: "Search Shopify orders using Shopify Admin GraphQL order query syntax.", Group: "orders"},
 	{Command: "orders resolve", Description: "Resolve human order names or numbers like 1942 to exact Shopify order records and GraphQL IDs.", Group: "orders"},
 	{Command: "products get", Description: "Get one Shopify product by GraphQL ID.", Group: "products"},
-	{Command: "products list", Description: "List products from the Shopify Admin GraphQL API.", Group: "products"},
+	{Command: "products list", Description: "List products from the Shopify Admin GraphQL API with rich operational fields.", Group: "products"},
+	// PATCH: advertise full-import resource commands added for SabeenManekia operational snapshots.
+	{Command: "shop get", Description: "Get Shopify shop account, plan, currency, and presentment metadata.", Group: "shop"},
+	{Command: "locations list", Description: "List Shopify fulfillment locations.", Group: "locations"},
+	{Command: "collections list", Description: "List Shopify collections with rules, product counts, and SEO metadata.", Group: "collections"},
+	{Command: "abandoned-checkouts list", Description: "List abandoned checkouts with recovery URL, customer, totals, and line items.", Group: "abandoned-checkouts"},
+	{Command: "discounts list", Description: "List Shopify discount-code nodes and summary metadata.", Group: "discounts"},
+	{Command: "draft-orders list", Description: "List draft orders with totals and customer email.", Group: "draft-orders"},
 }
 
 // whichMatch pairs an index entry with its ranking score for a query.

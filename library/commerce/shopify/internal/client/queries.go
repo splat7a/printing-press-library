@@ -5,30 +5,61 @@ package client
 
 // GraphQL query constants generated from the API spec.
 
-const CustomersGetQuery = `query($id: String!) {
-  customer(id: $id) {
-    id
-    email
-    firstName
-    lastName
-    numberOfOrders
-    amountSpent { amount currencyCode }
-    createdAt
-    updatedAt
+// PATCH: extend Shopify CLI read coverage to match SabeenManekia's full operational import surface.
+const ShopGetQuery = `query {
+  shop {
+    id name email myshopifyDomain primaryDomain { url host }
+    currencyCode ianaTimezone weightUnit
+    plan { displayName partnerDevelopment shopifyPlus }
+    billingAddress { country countryCodeV2 city province }
+    contactEmail customerAccounts
+    enabledPresentmentCurrencies
+    setupRequired taxesIncluded
+    checkoutApiSupported
+    features { storefront }
   }
 }`
 
+// PATCH: include customer phone/tags/state/default-address/last-order fields needed by SabeenManekia reporting.
+const CustomersGetQuery = `query($id: String!) {
+  customer(id: $id) {
+    id
+    displayName
+    email
+    phone
+    firstName
+    lastName
+    createdAt
+    updatedAt
+    numberOfOrders
+    amountSpent{ amount currencyCode }
+    tags
+    state
+    verifiedEmail
+    defaultAddress{ city province country }
+    lastOrder{ id name createdAt }
+  }
+}`
+
+// PATCH: include customer phone/tags/state/default-address/last-order fields needed by SabeenManekia reporting.
 const CustomersListQuery = `query($first: Int!, $after: String) {
   customers(first: $first, after: $after) {
     nodes {
       id
+      displayName
       email
+      phone
       firstName
       lastName
-      numberOfOrders
-      amountSpent { amount currencyCode }
       createdAt
       updatedAt
+      numberOfOrders
+      amountSpent{ amount currencyCode }
+      tags
+      state
+      verifiedEmail
+      defaultAddress{ city province country }
+      lastOrder{ id name createdAt }
     }
     pageInfo { hasNextPage endCursor }
   }
@@ -86,63 +117,240 @@ const InventoryItemsListQuery = `query($first: Int!, $after: String) {
   }
 }`
 
+// PATCH: add locations coverage for SabeenManekia operational snapshots.
+const LocationsListQuery = `query($first: Int!, $after: String) {
+  locations(first:$first, after:$after) {
+    nodes {
+      id
+      name
+      isActive
+      fulfillsOnlineOrders
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}`
+
+// PATCH: expose the rich order payload SabeenManekia imports need for direct get reads.
 const OrdersGetQuery = `query($id: String!) {
   order(id: $id) {
     id
     name
     createdAt
+    updatedAt
     processedAt
+    cancelledAt
+    closedAt
+    currencyCode
+    presentmentCurrencyCode
     displayFinancialStatus
     displayFulfillmentStatus
-    currencyCode
+    currentTotalPriceSet{ shopMoney{ amount currencyCode } presentmentMoney{ amount currencyCode } }
+    currentSubtotalPriceSet{ shopMoney{ amount } }
+    totalDiscountsSet{ shopMoney{ amount } }
+    totalShippingPriceSet{ shopMoney{ amount } }
+    totalTaxSet{ shopMoney{ amount } }
+    currentTotalDutiesSet{ shopMoney{ amount } }
     totalPriceSet { shopMoney { amount currencyCode } }
     totalRefundedSet { shopMoney { amount currencyCode } }
+    sourceName
+    tags
+    note
+    customer{ id email displayName }
+    shippingAddress{ city province country countryCodeV2 zip }
+    lineItems(first:50){ edges{ node{
+      title quantity sku vendor
+      originalUnitPriceSet{ shopMoney{ amount } }
+      discountedUnitPriceSet{ shopMoney{ amount } }
+      product{ id }
+      variant{ id title }
+    } } }
+    discountApplications(first:10){ edges{ node{
+      ... on DiscountCodeApplication{ code allocationMethod targetSelection targetType }
+      ... on AutomaticDiscountApplication{ title }
+      ... on ManualDiscountApplication{ title description }
+    } } }
+    shippingLines(first:5){ edges{ node{ title } } }
+    fulfillments(first:5){ status createdAt trackingInfo{ company number url } }
+    transactions(first:5){ kind status gateway amountSet{ shopMoney{ amount } } createdAt }
   }
 }`
 
-// PATCH: expose Shopify's native orders(query:) search fields for filtered reads and exact order resolution.
+// PATCH: expose the rich order payload SabeenManekia imports need: presentment money, line items, discounts, fulfillments, transactions, and shipping/customer fields.
 const OrdersListQuery = `query($first: Int!, $after: String, $query: String, $sortKey: OrderSortKeys, $reverse: Boolean) {
   orders(first: $first, after: $after, query: $query, sortKey: $sortKey, reverse: $reverse) {
     nodes {
       id
       name
       createdAt
+      updatedAt
       processedAt
+      cancelledAt
+      closedAt
+      currencyCode
+      presentmentCurrencyCode
       displayFinancialStatus
       displayFulfillmentStatus
-      cancelledAt
-      currencyCode
+      currentTotalPriceSet{ shopMoney{ amount currencyCode } presentmentMoney{ amount currencyCode } }
+      currentSubtotalPriceSet{ shopMoney{ amount } }
+      totalDiscountsSet{ shopMoney{ amount } }
+      totalShippingPriceSet{ shopMoney{ amount } }
+      totalTaxSet{ shopMoney{ amount } }
+      currentTotalDutiesSet{ shopMoney{ amount } }
       totalPriceSet { shopMoney { amount currencyCode } }
       totalRefundedSet { shopMoney { amount currencyCode } }
+      sourceName
+      tags
+      note
+      customer{ id email displayName }
+      shippingAddress{ city province country countryCodeV2 zip }
+      lineItems(first:50){ edges{ node{
+        title quantity sku vendor
+        originalUnitPriceSet{ shopMoney{ amount } }
+        discountedUnitPriceSet{ shopMoney{ amount } }
+        product{ id }
+        variant{ id title }
+      } } }
+      discountApplications(first:10){ edges{ node{
+        ... on DiscountCodeApplication{ code allocationMethod targetSelection targetType }
+        ... on AutomaticDiscountApplication{ title }
+        ... on ManualDiscountApplication{ title description }
+      } } }
+      shippingLines(first:5){ edges{ node{ title } } }
+      fulfillments(first:5){ status createdAt trackingInfo{ company number url } }
+      transactions(first:5){ kind status gateway amountSet{ shopMoney{ amount } } createdAt }
     }
     pageInfo { hasNextPage endCursor }
   }
 }`
 
+// PATCH: include rich catalog fields and nested variant/collection edge shapes for direct product get reads.
 const ProductsGetQuery = `query($id: String!) {
   product(id: $id) {
     id
     title
     handle
+    status
     vendor
     productType
-    status
+    tags
+    createdAt
     updatedAt
-    variants (first: 50) { nodes { id sku price inventoryItem { id } } }
+    publishedAt
+    totalInventory
+    tracksInventory
+    onlineStoreUrl
+    onlineStorePreviewUrl
+    description
+    featuredImage{ url altText }
+    priceRangeV2{ minVariantPrice{ amount currencyCode } maxVariantPrice{ amount currencyCode } }
+    variants(first:50){ edges{ node{
+      id title sku price compareAtPrice barcode position
+      inventoryQuantity inventoryPolicy
+      selectedOptions{ name value }
+      inventoryItem { id }
+    } } }
+    collections(first:20){ edges{ node{ id title handle } } }
+    seo{ title description }
   }
 }`
 
+// PATCH: include the rich catalog fields and nested variant/collection edge shapes consumed by SabeenManekia raw imports.
 const ProductsListQuery = `query($first: Int!, $after: String) {
   products(first: $first, after: $after) {
     nodes {
       id
       title
       handle
+      status
       vendor
       productType
-      status
+      tags
+      createdAt
       updatedAt
-      variants (first: 50) { nodes { id sku price inventoryItem { id } } }
+      publishedAt
+      totalInventory
+      tracksInventory
+      onlineStoreUrl
+      onlineStorePreviewUrl
+      description
+      featuredImage{ url altText }
+      priceRangeV2{ minVariantPrice{ amount currencyCode } maxVariantPrice{ amount currencyCode } }
+      variants(first:50){ edges{ node{
+        id title sku price compareAtPrice barcode position
+        inventoryQuantity inventoryPolicy
+        selectedOptions{ name value }
+        inventoryItem { id }
+      } } }
+      collections(first:20){ edges{ node{ id title handle } } }
+      seo{ title description }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}`
+
+// PATCH: add collections coverage for SabeenManekia product merchandising reports.
+const CollectionsListQuery = `query($first: Int!, $after: String) {
+  collections(first:$first, after:$after) {
+    nodes {
+      id
+      title
+      handle
+      updatedAt
+      productsCount{ count }
+      sortOrder
+      ruleSet{ rules{ column relation condition } }
+      seo{ title description }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}`
+
+// PATCH: add abandoned checkout coverage for SabeenManekia recovery workflows.
+const AbandonedCheckoutsListQuery = `query($first: Int!, $after: String) {
+  abandonedCheckouts(first:$first, after:$after) {
+    nodes {
+      id
+      name
+      abandonedCheckoutUrl
+      createdAt
+      updatedAt
+      totalPriceSet{ shopMoney{ amount currencyCode } }
+      lineItems(first:20){ edges{ node{ title quantity } } }
+      customer{ email displayName }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}`
+
+// PATCH: add discount code coverage for SabeenManekia operational snapshots.
+const DiscountsListQuery = `query($first: Int!, $after: String) {
+  codeDiscountNodes(first:$first, after:$after) {
+    nodes {
+      id
+      codeDiscount{
+        ... on DiscountCodeBasic{ title status startsAt endsAt
+          summary usageLimit appliesOncePerCustomer
+          codes(first:5){ edges{ node{ code } } }
+        }
+        ... on DiscountCodeBxgy{ title status startsAt endsAt summary }
+        ... on DiscountCodeFreeShipping{ title status startsAt endsAt summary }
+      }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}`
+
+// PATCH: add draft order coverage for SabeenManekia operational snapshots.
+const DraftOrdersListQuery = `query($first: Int!, $after: String) {
+  draftOrders(first:$first, after:$after) {
+    nodes {
+      id
+      name
+      createdAt
+      updatedAt
+      status
+      totalPriceSet{ shopMoney{ amount currencyCode } }
+      customer{ email }
     }
     pageInfo { hasNextPage endCursor }
   }

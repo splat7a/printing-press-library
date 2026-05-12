@@ -42,6 +42,17 @@ var readCommandResources = map[string][]string{
 	"shopify-pp-cli products list":   {"products"},
 	"shopify-pp-cli products get":    {"products"},
 	"shopify-pp-cli products search": {"products"},
+	// PATCH: auto-refresh cache coverage for SabeenManekia full-import resource commands.
+	"shopify-pp-cli locations":                {"locations"},
+	"shopify-pp-cli locations list":           {"locations"},
+	"shopify-pp-cli collections":              {"collections"},
+	"shopify-pp-cli collections list":         {"collections"},
+	"shopify-pp-cli abandoned-checkouts":      {"abandoned-checkouts"},
+	"shopify-pp-cli abandoned-checkouts list": {"abandoned-checkouts"},
+	"shopify-pp-cli discounts":                {"discounts"},
+	"shopify-pp-cli discounts list":           {"discounts"},
+	"shopify-pp-cli draft-orders":             {"draft-orders"},
+	"shopify-pp-cli draft-orders list":        {"draft-orders"},
 }
 
 // cachePolicy returns the cache freshness policy assembled from spec
@@ -67,6 +78,16 @@ func cachePolicy() cliutil.Policy {
 	}
 	if d, err := time.ParseDuration("1h"); err == nil {
 		perResource["products"] = d
+	}
+	// PATCH: freshness policies for full-import resources added for SabeenManekia.
+	if d, err := time.ParseDuration("1h"); err == nil {
+		perResource["locations"] = d
+		perResource["collections"] = d
+		perResource["discounts"] = d
+		perResource["draft-orders"] = d
+	}
+	if d, err := time.ParseDuration("10m"); err == nil {
+		perResource["abandoned-checkouts"] = d
 	}
 	envOptOut := "SHOPIFY_NO_AUTO_REFRESH"
 	return cliutil.Policy{

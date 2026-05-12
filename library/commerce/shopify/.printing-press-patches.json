@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "applied_at": "2026-05-08",
+  "applied_at": "2026-05-12",
   "base_run_id": "2026-05-02T03:53:03.774005Z",
   "base_printing_press_version": "3.2.1",
   "patches": [
@@ -13,6 +13,22 @@
         "internal/cli/orders.go",
         "internal/cli/orders_list.go",
         "internal/cli/orders_search_resolve.go",
+        "internal/cli/auto_refresh.go",
+        "internal/cli/which.go"
+      ]
+    },
+    {
+      "id": "sabeenmanekia-full-import-queries",
+      "summary": "Extends Shopify GraphQL query constants and command coverage for SabeenManekia raw import parity.",
+      "reason": "The existing generated Shopify CLI omitted shop, locations, collections, abandoned checkouts, discounts, draft orders, and richer order/product/customer fields required by the current operational import scripts.",
+      "files": [
+        "internal/client/queries.go",
+        "internal/client/queries_test.go",
+        "internal/cli/import_parity_commands.go",
+        "internal/cli/sabeenmanekia_parity_test.go",
+        "internal/cli/root.go",
+        "internal/cli/sync.go",
+        "internal/cli/helpers.go",
         "internal/cli/auto_refresh.go",
         "internal/cli/which.go"
       ]

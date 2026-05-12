@@ -7,14 +7,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/client"
+	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/cliutil"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
-	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/client"
-	"github.com/mvanhorn/printing-press-library/library/commerce/shopify/internal/cliutil"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -202,6 +202,13 @@ func isSyncAccessWarning(err error) (*accessWarning, bool) {
 			}
 		}
 		return &accessWarning{Status: 0, Reason: reason, Message: strings.Join(gqlErr.Messages, "; ")}, true
+	}
+
+	// PATCH: Shopify sometimes returns GraphQL access denials without an extensions.code.
+	// Treat clear access-policy text as a per-resource sync warning so default
+	// full-import sync can continue when a token lacks an optional scope.
+	if strings.HasPrefix(strings.ToLower(err.Error()), "graphql:") && looksLikeAccessDenial(err.Error()) {
+		return &accessWarning{Status: 0, Reason: "forbidden", Message: err.Error()}, true
 	}
 
 	return nil, false
