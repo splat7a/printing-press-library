@@ -1,0 +1,38 @@
+{
+  "manifest_version": "0.3",
+  "name": "meta-ads-pp-cli",
+  "display_name": "Meta Ads",
+  "version": "0.1.0",
+  "description": "Pull Meta Ads raw JSON snapshots while preserving SabeenManekia raw-file contracts.",
+  "author": {
+    "name": "CLI Printing Press"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "bin/meta-ads-pp-cli"
+  },
+  "user_config": {
+    "meta_access_token": {
+      "type": "string",
+      "title": "META_ACCESS_TOKEN",
+      "sensitive": true,
+      "required": true
+    },
+    "meta_ad_account_id": {
+      "type": "string",
+      "title": "META_AD_ACCOUNT_ID",
+      "required": true
+    },
+    "meta_business_id": {
+      "type": "string",
+      "title": "META_BUSINESS_ID",
+      "required": true
+    },
+    "meta_graph_api_version": {
+      "type": "string",
+      "title": "META_GRAPH_API_VERSION",
+      "description": "Optional Meta Graph API version override. Defaults to v21.0."
+    }
+  }
+}

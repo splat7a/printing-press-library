@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-12T04:03:20Z",
+  "printing_press_version": "manual-sabeenmanekia",
+  "api_name": "meta-ads",
+  "display_name": "Meta Ads",
+  "cli_name": "meta-ads-pp-cli",
+  "owner": "user",
+  "printer": "splat7a",
+  "printer_name": "splat7a",
+  "spec_path": "library/marketing/meta-ads/manifest.json",
+  "spec_format": "internal",
+  "spec_checksum": "sha256:e5ab79274f1db80eb8ec1af77f923be04a60bb07c2a2682d2b3d3ff0130b30a0",
+  "run_id": "20260512-meta-ads-sabeenmanekia",
+  "description": "Pull Meta Ads raw JSON snapshots from the Meta Graph API while preserving SabeenManekia raw-file contracts.",
+  "api_version": "v21.0",
+  "auth_type": "bearer_token",
+  "auth_env_vars": [
+    "META_ACCESS_TOKEN",
+    "META_AD_ACCOUNT_ID",
+    "META_BUSINESS_ID"
+  ],
+  "auth_env_var_specs": [
+    {
+      "name": "META_ACCESS_TOKEN",
+      "kind": "per_call",
+      "required": true,
+      "sensitive": true,
+      "description": "Meta Graph system-user access token. Read from env only; never pass as argv."
+    },
+    {
+      "name": "META_AD_ACCOUNT_ID",
+      "kind": "per_call",
+      "required": true,
+      "sensitive": false,
+      "description": "Meta ad account ID such as act_123."
+    },
+    {
+      "name": "META_BUSINESS_ID",
+      "kind": "per_call",
+      "required": true,
+      "sensitive": false,
+      "description": "Meta business ID for business-level resources."
+    },
+    {
+      "name": "META_GRAPH_API_VERSION",
+      "kind": "per_call",
+      "required": false,
+      "sensitive": false,
+      "description": "Optional Meta Graph API version override. Defaults to v21.0."
+    }
+  ],
+  "endpoint_template_vars": [
+    "api_version",
+    "ad_account_id",
+    "business_id"
+  ],
+  "auth_key_url": "https://developers.facebook.com/docs/marketing-api/system-users/",
+  "novel_features": [
+    {
+      "name": "SabeenManekia raw snapshot parity",
+      "command": "snapshot pull",
+      "description": "Writes the legacy Meta raw JSON filenames consumed by the SabeenManekia sheet and Supabase import flow."
+    },
+    {
+      "name": "Secret-safe Graph paging",
+      "command": "snapshot pull",
+      "description": "Uses Authorization headers, strips access_token from paging URLs, redacts HTTP errors, and omits page access tokens from pages.json."
+    }
+  ]
+}

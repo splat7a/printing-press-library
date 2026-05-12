@@ -868,6 +868,15 @@
       }
     },
     {
+      "name": "meta-ads",
+      "category": "marketing",
+      "api": "Meta Ads",
+      "description": "Pull Meta Ads raw JSON snapshots from the Meta Graph API while preserving SabeenManekia raw-file contracts.",
+      "path": "library/marketing/meta-ads",
+      "printer": "splat7a",
+      "printer_name": "splat7a"
+    },
+    {
       "name": "movie-goat",
       "category": "media-and-entertainment",
       "api": "Movie Goat",
